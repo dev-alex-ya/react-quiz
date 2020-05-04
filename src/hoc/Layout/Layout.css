@@ -1,0 +1,11 @@
+.Layout {
+  height: 100vh;/*100% доступной высоты экрана*/
+  display: flex;
+  flex-direction: column;
+}
+
+.Layout main {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;/*чтобы тег занял всю доступную высоту страницы*/
+}
