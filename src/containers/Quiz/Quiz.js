@@ -1,10 +1,13 @@
 import React, {Component} from 'react'
 import classes from './Quiz.module.css'
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz'
+import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz'
 
 class Quiz extends Component {
   state = {
+    isFinished: true,
     activeQuestion: 0,
+    answerState: null, // {[id]: 'success', 'error'}
     quiz: [
       {
         question: 'Какого цвета небо?',
@@ -29,22 +32,76 @@ class Quiz extends Component {
     ]
   }
 
+  
+
   onAnswerClickHandler = (answerId) => {
-    console.log(answerId)
-    this.setState({activeQuestion: this.state.activeQuestion + 1})
+    if (this.state.answerState) {
+      // Т.к. заранее неизвестно какой id будет получен в ответе,
+      // то вытаскиваем ключ-id из объекта answerState
+      const key = Object.keys(this.state.answerState)[0]
+      // И если этот ответ оказался правильным,
+      // то сразу выходим из хендлера
+      if(this.state.answerState[key] === 'success')
+        return
+    }
+
+    const question = this.state.quiz[this.state.activeQuestion]
+
+    if(question.rightAnswerId === answerId) {
+
+      this.setState({
+        answerState: {[answerId]: 'success'}
+      })
+
+      const timeout = window.setTimeout(() => {
+        
+        if (this.isQuizFinished()) {
+          this.setState({
+            isFinished: true
+          })
+        } else {
+          this.setState({
+            activeQuestion: this.state.activeQuestion + 1,
+            answerState: null
+          })    
+        }
+        
+        window.clearTimeout(timeout)
+      }, 1000)
+
+      console.log("Правильный ответ") 
+    } else {
+      this.setState({
+        answerState: {[answerId]: 'error'}
+      })
+      console.log("Не правильный ответ")
+    }
   }
+
+  //если закончились вопросы
+   isQuizFinished(){
+    return this.state.activeQuestion + 1 === this.state.quiz.length
+  }
+
   render() {
     return (
       <div className={classes.Quiz}>
         <div className={classes.QuizWrapper}>
           <h1>Ответьте на все вопросы</h1>
-          <ActiveQuiz
-            question={this.state.quiz[this.state.activeQuestion].question}
-            answers={this.state.quiz[this.state.activeQuestion].answers}
-            onAnswerClick={this.onAnswerClickHandler}
-            quizLength={this.state.quiz.length}
-            answerNumber={this.state.activeQuestion + 1}
-          />
+          {
+            this.state.isFinished
+            ? <FinishedQuiz />
+            : <ActiveQuiz
+                question={this.state.quiz[this.state.activeQuestion].question}
+                answers={this.state.quiz[this.state.activeQuestion].answers}
+                onAnswerClick={this.onAnswerClickHandler}
+                quizLength={this.state.quiz.length}
+                answerNumber={this.state.activeQuestion + 1}
+                state={this.state.answerState}
+              />
+          }
+          
+
         </div>
       </div>
     )
