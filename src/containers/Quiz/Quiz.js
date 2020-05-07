@@ -5,11 +5,13 @@ import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz'
 
 class Quiz extends Component {
   state = {
-    isFinished: true,
+    results: {},// {[id]: 'success', 'error'} для всех вопросов
+    isFinished: false,
     activeQuestion: 0,
     answerState: null, // {[id]: 'success', 'error'}
     quiz: [
       {
+        id: 1,
         question: 'Какого цвета небо?',
         rightAnswerId: 2,
         answers: [
@@ -20,6 +22,7 @@ class Quiz extends Component {
         ]
       },
       {
+        id: 2,
         question: 'В каком году основан Санкт-Петербург?',
         rightAnswerId: 3,
         answers: [
@@ -36,25 +39,27 @@ class Quiz extends Component {
 
   onAnswerClickHandler = (answerId) => {
     if (this.state.answerState) {
-      // Т.к. заранее неизвестно какой id будет получен в ответе,
-      // то вытаскиваем ключ-id из объекта answerState
       const key = Object.keys(this.state.answerState)[0]
-      // И если этот ответ оказался правильным,
-      // то сразу выходим из хендлера
-      if(this.state.answerState[key] === 'success')
+      if(this.state.answerState[key] === 'success'){
         return
+      }
+        
     }
 
     const question = this.state.quiz[this.state.activeQuestion]
+    const results = this.state.results
 
     if(question.rightAnswerId === answerId) {
+      if(!results[question.id]) {
+        results[question.id] = 'success'
+      }
 
       this.setState({
-        answerState: {[answerId]: 'success'}
+        answerState: {[answerId]: 'success'},
+        results
       })
 
       const timeout = window.setTimeout(() => {
-        
         if (this.isQuizFinished()) {
           this.setState({
             isFinished: true
@@ -71,8 +76,10 @@ class Quiz extends Component {
 
       console.log("Правильный ответ") 
     } else {
+      results[question.id] = 'error'
       this.setState({
-        answerState: {[answerId]: 'error'}
+        answerState: {[answerId]: 'error'},
+        results
       })
       console.log("Не правильный ответ")
     }
@@ -83,6 +90,15 @@ class Quiz extends Component {
     return this.state.activeQuestion + 1 === this.state.quiz.length
   }
 
+  retryHandler = () => {
+    this.setState({
+      results: {},
+      isFinished: false,
+      activeQuestion: 0,
+      answerState: null
+    })
+  }
+
   render() {
     return (
       <div className={classes.Quiz}>
@@ -90,7 +106,11 @@ class Quiz extends Component {
           <h1>Ответьте на все вопросы</h1>
           {
             this.state.isFinished
-            ? <FinishedQuiz />
+            ? <FinishedQuiz
+                results={this.state.results}
+                quiz={this.state.quiz}
+                onRetry={this.retryHandler}
+              />
             : <ActiveQuiz
                 question={this.state.quiz[this.state.activeQuestion].question}
                 answers={this.state.quiz[this.state.activeQuestion].answers}
