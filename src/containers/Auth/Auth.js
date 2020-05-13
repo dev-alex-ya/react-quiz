@@ -97,7 +97,7 @@ class Auth extends Component {
       const control = this.state.formControls[controlName]
       return (
         <Input
-          key={controlName+index}
+          key={controlName + index.toString()}
           type={control.type}
           value={control.value}
           valid={control.valid}
