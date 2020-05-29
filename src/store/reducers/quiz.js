@@ -1,9 +1,23 @@
-import {FETCH_QUIZES_ERROR, FETCH_QUIZES_START, FETCH_QUIZES_SUCCESS} from "../actions/actionTypes";
+import {
+  FETCH_QUIZES_START,
+  FETCH_QUIZES_SUCCESS,
+  FETCH_QUIZES_ERROR,
+  FETCH_QUIZE_SUCCESS,
+  QUIZ_SET_STATE,
+  FINISH_QUIZ,
+  QUIZ_NEXT_QUESTION,
+  QUIZ_RETRY
+} from "../actions/actionTypes";
 
 const initialState = {
   quizes: [],
   loading: true,
-  error: null
+  error: null,
+  results: {},
+  isFinished: false,
+  activeQuestion: 0,
+  answerState: null,
+  quiz: null,
 }
 
 export default function quizReducer(state = initialState, action) {
@@ -12,6 +26,10 @@ export default function quizReducer(state = initialState, action) {
       return {
         ...state, loading: true
       }
+    case FETCH_QUIZE_SUCCESS:
+      return {
+        ...state, loading: false, quiz: action.quiz
+      }
     case FETCH_QUIZES_SUCCESS:
       return {
         ...state, loading: false, quizes: action.quizes
@@ -19,6 +37,26 @@ export default function quizReducer(state = initialState, action) {
     case FETCH_QUIZES_ERROR:
       return {
         ...state, loading: false, error: action.error
+      }
+    case QUIZ_SET_STATE:
+      return {
+        ...state, answerState: action.answerState, results: action.results
+      }
+    case FINISH_QUIZ:
+      return {
+        ...state, isFinished: true
+      }
+    case QUIZ_NEXT_QUESTION:
+      return {
+        ...state, activeQuestion: action.number, answerState: null
+      }
+    case QUIZ_RETRY:
+      return {
+        ...state,
+        results: {},
+        isFinished: false,
+        activeQuestion: 0,
+        answerState: null
       }
     default:
       return state
