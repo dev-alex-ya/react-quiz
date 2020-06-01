@@ -9,8 +9,6 @@ class QuizList extends Component {
 
 
   renderQuizes() {
-    console.log('this.state.quizes: ', this.props.quizes);
-    
     return this.props.quizes.map((quiz) => {
       return (
         <li key={quiz.id}>
